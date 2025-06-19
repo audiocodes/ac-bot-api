@@ -1,0 +1,52 @@
+{
+  "name": "@audiocodes/ac-bot-api",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AudioCodes Bot API SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "build:watch": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "prepack": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/audiocodes/ac-bot-api.git"
+  },
+  "keywords": [
+    "audiocodes",
+    "bot",
+    "api",
+    "sdk"
+  ],
+  "author": "AudioCodes Ltd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/audiocodes/ac-bot-api/issues"
+  },
+  "homepage": "https://github.com/audiocodes/ac-bot-api#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@stylistic/eslint-plugin": "^4.4.1",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/debug": "^4.1.12",
+    "@types/node": "^24.0.3",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.1"
+  },
+  "dependencies": {
+    "debug": "^4.4.1",
+    "ws": "^8.18.2"
+  }
+}
