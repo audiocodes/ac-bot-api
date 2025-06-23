@@ -1,11 +1,19 @@
-# AudioCodes Bot API SDK 
-AudioCodes [LiveHub](https://www.audiocodes.com/solutions-products/saas/audiocodes-live-hub) is a platform that bridges telephony systems with traditional chatBots and conversational AI bots. It allows businesses to automate customer interactions, enhance engagement, and streamline workflows.
+# AudioCodes Bot API SDK
 
-This package provides a WebSocket client for the [AudiCodes Bot API](https://techdocs.audiocodes.com/voice-ai-connect/#Bot-API/ac-bot-api-mode-websocket.htm) 
-, enabling developers to create bots that can interact with users in real-time over WebSocket connections.
+[![npm](https://img.shields.io/npm/v/@audiocodes/ac-bot-api)](https://www.npmjs.com/package/@audiocodes/ac-bot-api)
+
+AudioCodes [Voice AI Connect](https://techdocs.audiocodes.com/voice-ai-connect) is a platform that
+bridges telephony systems with traditional chat bots and conversational AI bots. It allows
+businesses to automate customer interactions, enhance engagement, and streamline workflows.
+
+This package provides a WebSocket client for the
+[AudiCodes Bot API](https://techdocs.audiocodes.com/voice-ai-connect/#Bot-API/ac-bot-api-mode-websocket.htm),
+enabling developers to create bots that can interact with users in real-time over WebSocket connections.
 
 ## AC Bot API WebSocket short overview
-AC Bot API is a protocol that allows developers to create bots that can interact with users in real-time over WebSocket connections. It provides a way to send and receive text or voice over WebSocket connections.<br><br>
+AC Bot API is a protocol that allows developers to create bots that can interact with users in
+real-time over WebSocket connections. It provides a way to send and receive text or voice over
+WebSocket connections.<br><br>
 
 ## How to use
 The `BotConversationWebSocket` emits the following events:
@@ -73,5 +81,3 @@ api.on('conversation', (conversation: BotConversationWebSocket, { initiateMessag
 ```
 
 See more detailed example in AudioCodes Bot samples [repository](https://github.com/ac-voice-ai/ac-api-samples)
-
-
