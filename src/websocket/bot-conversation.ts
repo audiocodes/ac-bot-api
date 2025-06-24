@@ -5,8 +5,10 @@ import {
   BotActivity,
   BotActivityType,
   BotToVaicMessageName,
+  MediaFormat,
   PlayAudioOptions,
   ProtocolMessage,
+  StreamMode,
   VaicToBotMessageName
 } from './types.js';
 import { EventEmitter } from 'events';
@@ -27,12 +29,12 @@ function redactMessage(message: ProtocolMessage) {
 export class BotConversationWebSocket extends EventEmitter {
   private ended = false;
   private conversationId = '';
-  private mediaFormat = 'raw/lpcm16';
+  private mediaFormat = MediaFormat.RAW_LINEAR_16;
   private recordingSeq = 0;
   private sendBackIncomingVoice?: NodeJS.Timeout;
   private userAudio?: PassThrough;
 
-  constructor(private websocket: WebSocket) {
+  constructor(private websocket: WebSocket, private streamMode: StreamMode = StreamMode.BINARY) {
     super();
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     websocket.on('message', async (message) => {
@@ -60,17 +62,17 @@ export class BotConversationWebSocket extends EventEmitter {
     log(`[${this.conversationId}]`, ...args);
   }
 
-  playAudio(stream: Readable, options?: PlayAudioOptions) {
+  playAudio(stream: Readable, options?: PlayAudioOptions, streamMode: StreamMode = this.streamMode) {
     const currentId = `play-${this.recordingSeq++}`;
     let streamEnded = false;
     this.send(BotToVaicMessageName.playStreamStart, { mediaFormat: this.mediaFormat, streamId: currentId, ...options })
       .then(() => {
-        stream.on('data', (chunk: Buffer) => {
+        stream.on('data', (chunk: Buffer | string) => {
           if (streamEnded || this.ended) {
             return;
           }
           this.send(BotToVaicMessageName.playStreamChunk, {
-            audioChunk: chunk.toString('base64'),
+            audioChunk: streamMode === StreamMode.BASE64 ? chunk : chunk.toString('base64'),
             streamId: currentId
           }).catch(() => {
             streamEnded = true;
@@ -125,7 +127,11 @@ export class BotConversationWebSocket extends EventEmitter {
         await this.send(BotToVaicMessageName.userStreamStarted);
         break;
       case VaicToBotMessageName.userStreamChunk:
-        this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
+        if (this.streamMode === StreamMode.BINARY) {
+          this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
+          break;
+        }
+        this.userAudio?.write(msgJson.audioChunk!);
         break;
       case VaicToBotMessageName.userStreamStop:
         this.#log('user stream stopped');
