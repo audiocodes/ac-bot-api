@@ -1,4 +1,3 @@
-import Stream from 'stream';
 
 export enum BotActivityType {
   message = 'message',
@@ -82,10 +81,20 @@ export enum BotToVaicMessageName {
   playStreamStop = 'playStream.stop'
 }
 
+export enum MediaFormat {
+  RAW_LINEAR_16 = 'raw/lpcm16',
+  RAW_LINEAR_16_24 = 'raw/lpcm16_24'
+};
+
+export enum StreamMode {
+  BINARY = 'binary',
+  BASE64 = 'base64',
+};
+
 export interface PlayAudioOptions {
   altText?: string;
   activityParams?: Record<string, unknown>;
-  mediaFormat?: string;
+  mediaFormat?: MediaFormat;
 };
 
 export interface ProtocolMessage extends PlayAudioOptions {
