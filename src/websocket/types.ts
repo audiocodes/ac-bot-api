@@ -86,11 +86,6 @@ export enum MediaFormat {
   RAW_LINEAR_16_24 = 'raw/lpcm16_24'
 };
 
-export enum StreamMode {
-  BINARY = 'binary',
-  BASE64 = 'base64',
-};
-
 export interface PlayAudioOptions {
   altText?: string;
   activityParams?: Record<string, unknown>;

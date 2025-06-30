@@ -8,7 +8,6 @@ import {
   MediaFormat,
   PlayAudioOptions,
   ProtocolMessage,
-  StreamMode,
   VaicToBotMessageName
 } from './types.js';
 import { EventEmitter } from 'events';
@@ -34,7 +33,7 @@ export class BotConversationWebSocket extends EventEmitter {
   private sendBackIncomingVoice?: NodeJS.Timeout;
   private userAudio?: PassThrough;
 
-  constructor(private websocket: WebSocket, private streamMode: StreamMode = StreamMode.BINARY) {
+  constructor(private websocket: WebSocket) {
     super();
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     websocket.on('message', async (message) => {
@@ -62,7 +61,7 @@ export class BotConversationWebSocket extends EventEmitter {
     log(`[${this.conversationId}]`, ...args);
   }
 
-  playAudio(stream: Readable, options?: PlayAudioOptions, streamMode: StreamMode = this.streamMode) {
+  playAudio(stream: Readable, options?: PlayAudioOptions) {
     const currentId = `play-${this.recordingSeq++}`;
     let streamEnded = false;
     this.send(BotToVaicMessageName.playStreamStart, { mediaFormat: this.mediaFormat, streamId: currentId, ...options })
@@ -72,7 +71,7 @@ export class BotConversationWebSocket extends EventEmitter {
             return;
           }
           this.send(BotToVaicMessageName.playStreamChunk, {
-            audioChunk: streamMode === StreamMode.BASE64 ? chunk : chunk.toString('base64'),
+            audioChunk: chunk.toString('base64'),
             streamId: currentId
           }).catch(() => {
             streamEnded = true;
@@ -127,11 +126,7 @@ export class BotConversationWebSocket extends EventEmitter {
         await this.send(BotToVaicMessageName.userStreamStarted);
         break;
       case VaicToBotMessageName.userStreamChunk:
-        if (this.streamMode === StreamMode.BINARY) {
-          this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
-          break;
-        }
-        this.userAudio?.write(msgJson.audioChunk!);
+        this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
         break;
       case VaicToBotMessageName.userStreamStop:
         this.#log('user stream stopped');
