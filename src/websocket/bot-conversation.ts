@@ -10,8 +10,9 @@ import {
   ProtocolMessage,
   VaicToBotMessageName
 } from './types.js';
-import { EventEmitter } from 'events';
+import ee2, { type Listener } from 'eventemitter2';
 import { PassThrough, Readable, } from 'stream';
+const { EventEmitter2 } = ee2;
 
 const log = debug('ac-bot-api');
 
@@ -24,8 +25,15 @@ function redactMessage(message: ProtocolMessage) {
   };
 }
 
-// TODO: EventEmitter<BotConversationEvents>
-export class BotConversationWebSocket extends EventEmitter {
+
+declare interface BotConversationEvents {
+  on(event: 'conversation.start', listener: (message: ProtocolMessage) => Promise<void>): this | Listener;
+  on(event: 'userStream', listener: (stream: PassThrough, options: { message: ProtocolMessage }) => void): this | Listener;
+  on(event: 'activity', listener: (activity: BotActivity) => void): this | Listener;
+  on(event: 'end', listener: (message?: ProtocolMessage) => void): this | Listener;
+  on(event: 'error', listener: (error: Error) => void): this | Listener;
+}
+export class BotConversationWebSocket extends EventEmitter2 implements BotConversationEvents {
   private ended = false;
   private conversationId = '';
   private mediaFormat = MediaFormat.RAW_LINEAR_16;
@@ -108,10 +116,20 @@ export class BotConversationWebSocket extends EventEmitter {
     switch (msgJson.type) {
       case VaicToBotMessageName.sessionInitiate: {
         this.conversationId = msgJson.conversationId!;
-        this.emit('conversation.start', msgJson);
-        await this.send(BotToVaicMessageName.sessionAccepted, {
-          mediaFormat: this.mediaFormat
-        });
+        try {
+          await this.emitAsync('conversation.start', msgJson);
+          await this.send(BotToVaicMessageName.sessionAccepted, {
+            mediaFormat: this.mediaFormat
+          });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          this.#log('Error handling conversation.start:', error);
+          await this.send(BotToVaicMessageName.sessionError, {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            reason: `Error handling conversation.start: ${error.message || error}`,
+          });
+          this.close();
+        }
         break;
       }
       case VaicToBotMessageName.sessionResume:
