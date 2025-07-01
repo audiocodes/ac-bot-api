@@ -1,6 +1,7 @@
 import debug from 'debug';
 import http, { IncomingMessage } from 'node:http';
-import { EventEmitter } from 'node:events';
+import ee2 from 'eventemitter2';
+const { EventEmitter2 } = ee2;
 import { WebSocket, WebSocketServer } from 'ws';
 import { BotConversationWebSocket } from './bot-conversation.js';
 import { ProtocolMessage } from './types.js';
@@ -14,7 +15,7 @@ export interface BotApiServerOptions {
   token?: string;
 }
 
-export class BotApiWebSocket extends EventEmitter {
+export class BotApiWebSocket extends EventEmitter2 {
   private server?: http.Server;
   #port = 8080;
 
@@ -39,8 +40,9 @@ export class BotApiWebSocket extends EventEmitter {
     });
     webSockServer.on('connection', (websocket: WebSocket, request: IncomingMessage) => {
       const conversation = new BotConversationWebSocket(websocket);
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       conversation.on('conversation.start', (initiateMessage: ProtocolMessage) => {
-        this.emit('conversation', conversation, { request, initiateMessage });
+        return this.emitAsync('conversation', conversation, { request, initiateMessage });
       });
     });
 
