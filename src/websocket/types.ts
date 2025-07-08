@@ -98,6 +98,7 @@ export interface ProtocolMessage extends PlayAudioOptions {
   expectAudioMessages?: boolean;
   supportedMediaFormats?: string[];
   caller?: string;
+  participant?: string
   activities?: BotActivity[];
   audioChunk?: string;
   [key: string]: unknown;

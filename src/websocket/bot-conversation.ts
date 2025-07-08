@@ -141,7 +141,7 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
       case VaicToBotMessageName.userStreamStart:
         this.userAudio = new PassThrough();
         this.emit('userStream', this.userAudio, { message: msgJson });
-        await this.send(BotToVaicMessageName.userStreamStarted);
+        await this.send(BotToVaicMessageName.userStreamStarted, { participant: msgJson.participant });
         break;
       case VaicToBotMessageName.userStreamChunk:
         this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
@@ -149,7 +149,7 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
       case VaicToBotMessageName.userStreamStop:
         this.#log('user stream stopped');
         this.userAudio?.end();
-        await this.send(BotToVaicMessageName.userStreamStopped);
+        await this.send(BotToVaicMessageName.userStreamStopped, { participant: msgJson.participant });
         delete this.userAudio;
         break;
       case VaicToBotMessageName.activities:
@@ -191,21 +191,27 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
     }
   }
 
-  sendHypothesis(text: string) {
+  sendHypothesis(text: string, participant?: string) {
     return this.send(BotToVaicMessageName.userStreamSpeechHypothesis, {
+      participant,
       alternatives: [{
         text: text.toLowerCase()
       }]
     });
   }
 
-  sendRecognition(text: string, confidence: number) {
+  sendRecognition(text: string, confidence: number, participant?: string) {
     return this.send(BotToVaicMessageName.userStreamSpeechRecognition, {
+      participant,
       alternatives: [{
         text: text.toLowerCase(),
         confidence
       }]
     });
+  }
+
+  sendCommitted(participant?: string) {
+    return this.send(BotToVaicMessageName.userStreamSpeechCommitted, { participant });
   }
 
   async playTextMessage(text: string, params?: Record<string, unknown>) {
