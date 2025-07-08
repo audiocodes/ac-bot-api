@@ -39,7 +39,7 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
   private mediaFormat = MediaFormat.RAW_LINEAR_16;
   private recordingSeq = 0;
   private sendBackIncomingVoice?: NodeJS.Timeout;
-  private userAudio?: PassThrough;
+  private userAudio = new Map<string|undefined, PassThrough>();
 
   constructor(private websocket: WebSocket) {
     super();
@@ -139,18 +139,18 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
           await this.send(BotToVaicMessageName.sessionError, { conversationId: msgJson.conversationId, reason: 'conversation not found' });
         break;
       case VaicToBotMessageName.userStreamStart:
-        this.userAudio = new PassThrough();
-        this.emit('userStream', this.userAudio, { message: msgJson });
+        this.userAudio.set(msgJson.participant, new PassThrough());
+        this.emit('userStream', this.userAudio.get(msgJson.participant), { message: msgJson });
         await this.send(BotToVaicMessageName.userStreamStarted, { participant: msgJson.participant });
         break;
       case VaicToBotMessageName.userStreamChunk:
-        this.userAudio?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
+        this.userAudio.get(msgJson.participant)?.write(Buffer.from(msgJson.audioChunk!, 'base64'));
         break;
       case VaicToBotMessageName.userStreamStop:
         this.#log('user stream stopped');
-        this.userAudio?.end();
+        this.userAudio.get(msgJson.participant)?.end();
         await this.send(BotToVaicMessageName.userStreamStopped, { participant: msgJson.participant });
-        delete this.userAudio;
+        this.userAudio.delete(msgJson.participant);
         break;
       case VaicToBotMessageName.activities:
         for (const activity of msgJson.activities!)
