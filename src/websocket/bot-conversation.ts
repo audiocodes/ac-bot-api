@@ -98,10 +98,10 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
       .catch(() => { });
   }
 
-  close() {
+  close(msgJson?: ProtocolMessage) {
     if (this.ended)
       return
-    this.emit('end');
+    this.emit('end', msgJson);
     this.websocket.close();
     this.ended = true;
     if (this.sendBackIncomingVoice) {
@@ -158,8 +158,7 @@ export class BotConversationWebSocket extends EventEmitter2 implements BotConver
         break;
 
       case VaicToBotMessageName.sessionEnd:
-        this.close();
-        this.emit('end', msgJson);
+        this.close(msgJson);
         break;
       default:
         this.#log('handling unknown message:', msgJson.type);
