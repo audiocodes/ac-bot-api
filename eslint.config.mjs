@@ -22,7 +22,6 @@ export default tseslint.config(
       sourceType: 'module',
 
       parserOptions: {
-        project: './tsconfig.json',
         projectService: true,
         tsconfigRootDir: import.meta.dirname
       }
@@ -34,7 +33,8 @@ export default tseslint.config(
   {
     ignores: [
       'dist/',
-      'node_modules/'
+      'node_modules/',
+      '**/*js'
     ]
   },
   {
