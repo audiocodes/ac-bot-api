@@ -13,8 +13,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "prepack": "npm run build"
+    "prepack": "pnpm build"
   },
+  "packageManager": "pnpm@11.20.0",
   "files": [
     "dist"
   ],
