@@ -10,8 +10,10 @@ import {
   ProtocolMessage,
   VaicToBotMessageName,
 } from './types.js';
-import { EventEmitter2, type Listener } from 'eventemitter2';
+import ee2, { type Listener } from 'eventemitter2';
 import { PassThrough, Readable } from 'stream';
+
+const { EventEmitter2 } = ee2;
 
 const log = debug('ac-bot-api');
 
