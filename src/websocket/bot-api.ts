@@ -26,6 +26,7 @@ export class BotApiWebSocket extends EventEmitter2 {
   }
 
   listen(options?: BotApiServerOptions, callback?: () => void): BotApiWebSocket {
+    this.ownServer = !options?.server;
     this.server = options?.server || http.createServer();
     if (options?.port)
       this.#port = options.port;
@@ -44,7 +45,7 @@ export class BotApiWebSocket extends EventEmitter2 {
     if (options?.path) {
       const webSockServer = new WebSocketServer({
         perMessageDeflate: false,
-        noServer: true,
+        noServer: true
       });
       webSockServer.on('connection', handleConnection);
       this.server.on('upgrade', (request: IncomingMessage, socket, head) => {
@@ -61,15 +62,17 @@ export class BotApiWebSocket extends EventEmitter2 {
         });
       });
     } else {
-      this.server.keepAliveTimeout = 30000;
-      this.ownServer = true;
-      this.server.listen(this.#port, options?.host, callback);
       const webSockServer = new WebSocketServer({
         perMessageDeflate: false,
         server: this.server,
-        verifyClient,
+        verifyClient
       });
       webSockServer.on('connection', handleConnection);
+    }
+
+    if (this.ownServer) {
+      this.server.keepAliveTimeout = 30000;
+      this.server.listen(this.#port, options?.host, callback);
     }
 
     return this;
