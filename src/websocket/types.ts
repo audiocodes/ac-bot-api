@@ -89,6 +89,7 @@ export interface PlayAudioOptions {
   altText?: string;
   activityParams?: Record<string, unknown>;
   mediaFormat?: MediaFormat;
+  targetPlayer?: string;
 }
 
 export interface ProtocolMessage extends PlayAudioOptions {
